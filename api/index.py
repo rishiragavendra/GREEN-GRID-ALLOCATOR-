@@ -1,8 +1,4 @@
-"""FastAPI app - serves the API (stateless) and, locally, the static UI.
-
-Local:   python app.py   (or run.bat / run.sh)
-Vercel:  this file is the serverless function; public/ is served by the CDN.
-"""
+"""Green Grid FastAPI API and dashboard for local use and Vercel."""
 import sys
 from pathlib import Path
 
@@ -152,10 +148,14 @@ def model_performance():
     }
 
 
-# Local only: on Vercel the CDN serves public/ before this function is reached.
-if PUBLIC.exists():
-    @app.get("/")
-    def index():
-        return FileResponse(PUBLIC / "index.html")
+# Serve the frontend from FastAPI as well as the API.
+# The Vercel function must include public/** in its bundled files.
+@app.get("/", include_in_schema=False)
+def index():
+    if not (PUBLIC / "index.html").is_file():
+        raise HTTPException(status_code=500, detail="Frontend index.html is missing from deployment")
+    return FileResponse(PUBLIC / "index.html")
 
-    app.mount("/", StaticFiles(directory=str(PUBLIC)), name="public")
+
+# Mount after API routes so it does not shadow them.
+app.mount("/", StaticFiles(directory=str(PUBLIC), check_dir=False), name="public")
