@@ -3,275 +3,360 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Green Grid Allocator</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9889;</text></svg>">
-<link rel="stylesheet" href="style.css">
+<title>Green Grid | Intelligent Sustainable Energy Management</title>
+<meta name="description" content="Machine-learning forecasts drive an hourly, renewables-first dispatch of a city power grid.">
+<meta name="theme-color" content="#080B10">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="loading">
 
-  <!-- animated background -->
-  <div class="bg" aria-hidden="true">
-    <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
-    <span class="grid-overlay"></span>
+<!-- icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-overview" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24"><path d="M2.5 12.5h4.2l2.6-7 4.4 13 2.6-6H21.5"/></symbol>
+    <symbol id="i-sources" viewBox="0 0 24 24"><path d="M13.2 2.8 5 13.6h6l-1 7.6 8.2-10.8h-6z"/></symbol>
+    <symbol id="i-predict" viewBox="0 0 24 24"><path d="M3 17.5 9 11l4 4 8-9"/><path d="M15 6h6v6"/></symbol>
+    <symbol id="i-model" viewBox="0 0 24 24"><path d="M5 20V11M12 20V4M19 20v-6M3 20.5h18"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></symbol>
+    <symbol id="i-wind" viewBox="0 0 24 24"><path d="M3 9h10.5a2.5 2.5 0 1 0-2.5-2.5M3 15h14a2.5 2.5 0 1 1-2.5 2.5M3 12h7"/></symbol>
+    <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3.2c3.6 4.2 6 7.3 6 10.4a6 6 0 0 1-12 0c0-3.1 2.4-6.2 6-10.4z"/></symbol>
+    <symbol id="i-battery" viewBox="0 0 24 24"><rect x="3" y="7" width="16" height="10" rx="2.2"/><path d="M21.5 10.5v3M7 12h6"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 21a6.5 6.5 0 0 0 6.5-6.5c0-3.4-2.6-5.2-3.6-8.5-2 1.1-3 2.7-3.2 4.4C10.4 9.6 9 8.7 9 6.5 6.5 8.8 5.5 11.6 5.5 14.5A6.5 6.5 0 0 0 12 21z"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.2 2.8 5 13.6h6l-1 7.6 8.2-10.8h-6z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.6c0 4.5 3.1 7.8 7.5 9.4 4.4-1.6 7.5-4.9 7.5-9.4V6z"/><path d="m8.8 12.2 2.3 2.3 4.2-4.6"/></symbol>
+    <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19c0-9 5-14 15-14 0 10-5 15-14 15"/><path d="M5 19c2-4 5-7 9-9"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4.5 17a8.5 8.5 0 1 1 15 0"/><path d="m12 13 3.5-4.5"/></symbol>
+    <symbol id="i-demand" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7.5v4.5l3 2M17 3.5h3.5V7"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.8v14.4L19 12z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6M19 6v12"/></symbol>
+    <symbol id="i-fwd" viewBox="0 0 24 24"><path d="m10 6 6 6-6 6M5 6v12"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18.5a4.5 4.5 0 0 1-.6-8.9A6 6 0 0 1 18 10.5a4 4 0 0 1-.5 8z"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></symbol>
+    <symbol id="i-load" viewBox="0 0 24 24"><path d="M3.5 7.5V18a1.5 1.5 0 0 0 1.5 1.5h14a1.5 1.5 0 0 0 1.5-1.5V9.5A1.5 1.5 0 0 0 19 8h-7l-2-2.5H5A1.5 1.5 0 0 0 3.5 7z"/></symbol>
+    <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 14v5.5h14V14"/></symbol>
+    <symbol id="i-import" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 14v5.5h14V14"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.6-5.9M4 4v4.5h4.5"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3.5c.8 4.8 3.2 7.2 8 8-4.8.8-7.2 3.2-8 8-.8-4.8-3.2-7.2-8-8 4.8-.8 7.2-3.2 8-8z"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M10 7V4.5h4V7M7 7l.8 12.5h8.4L17 7M10.5 11v5.5M13.5 11v5.5"/></symbol>
+  </defs>
+</svg>
+
+<div class="bg" aria-hidden="true"></div>
+
+<!-- ================= HEADER ================= -->
+<header class="top">
+  <a class="brand" href="#overview" aria-label="Green Grid overview">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 6h17l-7 7h-10z" fill="#27E0CF"/><path d="M29 26H12l7-7h10z" fill="#14B8A6"/><path d="M5 19l7-6h7l-7 6z" fill="#0f8f82"/></svg>
+    <span class="brand-text"><b>GREEN GRID</b><small>Intelligent Sustainable Energy Management</small></span>
+  </a>
+
+  <button class="burger icon-btn" id="navToggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav"><svg class="i"><use href="#i-menu"/></svg></button>
+
+  <nav class="nav" id="nav" aria-label="Main">
+    <a href="#overview" data-view="overview"><svg class="i"><use href="#i-overview"/></svg><span>Overview</span></a>
+    <a href="#monitoring" data-view="monitoring"><svg class="i"><use href="#i-monitor"/></svg><span>Grid Monitoring</span></a>
+    <a href="#sources" data-view="sources"><svg class="i"><use href="#i-sources"/></svg><span>Energy Sources</span></a>
+    <a href="#predictions" data-view="predictions"><svg class="i"><use href="#i-predict"/></svg><span>AI Predictions</span></a>
+    <a href="#models" data-view="models"><svg class="i"><use href="#i-model"/></svg><span>Model Performance</span></a>
+    <a href="#settings" data-view="settings"><svg class="i"><use href="#i-settings"/></svg><span>Settings</span></a>
+  </nav>
+
+  <div class="top-right">
+    <div class="chip status" id="liveBadge" title="API connection"><i></i><span id="liveLabel">Connecting</span></div>
   </div>
+</header>
 
-  <!-- ============ TOP BAR ============ -->
-  <header class="topbar">
-    <div class="brand">
-      <div class="logo">⚡</div>
-      <div class="brand-text">
-        <h1>Green Grid <span>Allocator</span></h1>
-        <p class="subtitle">Intelligent Sustainable Energy Dispatch</p>
-      </div>
+<main class="page" id="app">
+
+  <!-- ================= INDICATORS ================= -->
+  <section class="kpis" id="kpis" aria-label="Key indicators"></section>
+
+  <!-- ================= SIMULATION DOCK ================= -->
+  <section class="dock" aria-label="Simulation controls">
+    <div class="dock-group">
+      <span class="dock-label">Time</span>
+      <span class="clock" title="Simulation time"><svg class="i"><use href="#i-demand"/></svg><span id="timeChip">&ndash;</span></span>
+      <button class="icon-btn" id="btnBack" type="button" title="Back one hour" aria-label="Back one hour"><svg class="i"><use href="#i-back"/></svg></button>
+      <button class="icon-btn solid" id="btnFwd" type="button" title="Forward one hour" aria-label="Forward one hour"><svg class="i"><use href="#i-fwd"/></svg></button>
+      <button class="btn" id="btnPlay" type="button" aria-pressed="false"><svg class="i"><use href="#i-play"/></svg><span>Play</span></button>
+      <input type="datetime-local" id="timePick" step="3600" aria-label="Jump to date and time">
+      <button class="btn" id="btnSetTime" type="button">Go</button>
     </div>
-    <div class="topbar-right">
-      <div class="time-chip" id="timeChip" title="Simulator time">🕐 —</div>
-      <div class="live-badge" id="liveBadge" title="Live updates every 1.5s"><span class="dot"></span><span id="liveLabel">LIVE</span></div>
-      <button class="btn ghost" id="guideBtn" type="button">📘&nbsp; Guide</button>
+    <div class="dock-group">
+      <span class="dock-label">Demand</span>
+      <button class="icon-btn" id="btnDemandDown" type="button" aria-label="Decrease demand by 10 MW"><svg class="i"><use href="#i-minus"/></svg></button>
+      <label class="demand-box"><input type="number" id="demandSet" min="0" step="5" aria-label="Demand in MW" placeholder="MW"><em>MW</em></label>
+      <button class="icon-btn" id="btnDemandUp" type="button" aria-label="Increase demand by 10 MW"><svg class="i"><use href="#i-plus"/></svg></button>
     </div>
-  </header>
-
-  <!-- ============ KPI CARDS (built by JS) ============ -->
-  <section class="kpis" id="kpis" aria-label="Key metrics"></section>
-
-  <!-- ============ CHARTS ============ -->
-  <main class="charts">
-    <section class="card fade" id="cardMix" style="--d:0s">
-      <div class="card-head">
-        <h2>Renewable vs Non-Renewable</h2>
-        <span class="hint" id="mixSub">dispatch this hour</span>
-      </div>
-      <div class="mix-chart">
-        <div class="mix-legend">
-          <span><i class="swatch ren"></i>Renewable</span>
-          <span><i class="swatch fos"></i>Fossil</span>
-          <span><i class="swatch unmet"></i>Unmet</span>
-        </div>
-        <div class="mix-track" id="mixTrack">
-          <div class="mix-seg seg-ren" id="segRen"></div>
-          <div class="mix-seg seg-fos" id="segFos"></div>
-          <div class="mix-seg seg-unmet" id="segUnmet"></div>
-        </div>
-        <div class="mix-nums" id="mixNums"></div>
-      </div>
-    </section>
-
-    <section class="card fade" id="cardSources" style="--d:.06s">
-      <div class="card-head">
-        <h2>Source Contribution</h2>
-        <span class="hint">MW dispatched</span>
-      </div>
-      <div class="source-bars" id="sourceBars"></div>
-    </section>
-
-    <section class="card wide fade" id="cardTrend" style="--d:.12s">
-      <div class="card-head">
-        <h2>Renewable Share Over Time</h2>
-        <span class="hint">% of demand served by renewables · hover for details</span>
-      </div>
-      <div class="canvas-wrap">
-        <canvas id="trendChart" height="280"></canvas>
-        <div class="tooltip" id="trendTip" hidden></div>
-      </div>
-    </section>
-  </main>
-
-  <!-- ============ SOURCES TABLE ============ -->
-  <section class="card fade table-card" style="--d:.18s">
-    <div class="card-head">
-      <h2>Grid Sources</h2>
-      <span class="hint" id="tableSub">dispatch table</span>
-    </div>
-    <div class="table-wrap">
-      <table id="srcTable">
-        <thead>
-          <tr>
-            <th class="l">Source</th>
-            <th class="l">Type</th>
-            <th class="r">Capacity</th>
-            <th class="r">Available</th>
-            <th class="r">Used</th>
-            <th class="r">SoC</th>
-            <th class="r rm">Remove</th>
-          </tr>
-        </thead>
-        <tbody id="srcBody"></tbody>
-      </table>
+    <div class="dock-group">
+      <button class="btn" id="btnWeather" type="button"><svg class="i"><use href="#i-cloud"/></svg><span>Weather</span></button>
+      <button class="btn primary" id="btnAddSource" type="button"><svg class="i"><use href="#i-plus"/></svg><span>Add source</span></button>
     </div>
   </section>
 
-  <!-- ============ MODEL PERFORMANCE (traditional ML benchmark) ============ -->
-  <section class="card fade table-card" id="cardPerf" style="--d:.21s">
-    <div class="card-head">
-      <h2>Model Performance</h2>
-      <span class="hint" id="perfSub">traditional ML benchmark</span>
-    </div>
+  <div class="banner" id="errBanner" hidden>
+    <span>The API could not be reached. Check that the server is running.</span>
+    <button class="btn" id="btnRetry" type="button">Retry</button>
+  </div>
 
-    <div id="perfEmpty" class="perf-empty">Loading benchmark results…</div>
-
-    <div id="perfBody" hidden>
-      <div class="perf-picks">
-        <div class="perf-pick">
-          <div class="pp-label">Best individual model</div>
-          <div class="pp-name" id="perfBestIndiv">—</div>
-          <div class="pp-why" id="perfBestIndivWhy">—</div>
+  <!-- ================= OVERVIEW ================= -->
+  <section class="view" id="view-overview" aria-labelledby="ovTitle">
+    <div class="ov">
+      <div class="stage">
+        <div class="stage-copy">
+          <h1 id="ovTitle">Smart Energy<br>Infrastructure</h1>
+          <p>Optimise clean energy and grid performance in real time.</p>
         </div>
-        <div class="perf-pick alt">
-          <div class="pp-label">Best combination</div>
-          <div class="pp-name" id="perfBestEns">—</div>
-          <div class="pp-why" id="perfBestEnsWhy">—</div>
-        </div>
+        <div class="scene" id="scene"></div>
+        <div class="scene-tip" id="sceneTip" hidden></div>
+        <div class="scene-note">Illustration. Glow, motion and lit windows follow the live simulation.</div>
+        <div class="insight" id="insight" role="status"><span class="ins-ico"><svg class="i"><use href="#i-spark"/></svg></span><p id="insightText">&ndash;</p></div>
       </div>
 
+      <aside class="card alloc">
+        <header class="card-h"><h2>Supply allocation</h2><span class="muted" id="allocSub"></span></header>
+        <div class="ring-wrap">
+          <svg class="ring" viewBox="0 0 220 220" role="img" aria-label="Supply mix">
+            <circle class="ring-bg" cx="110" cy="110" r="84"/>
+            <circle class="ring-seg fos" id="ringFos" cx="110" cy="110" r="84"/>
+            <circle class="ring-seg ren" id="ringRen" cx="110" cy="110" r="84"/>
+            <circle class="ring-seg unmet" id="ringUnmet" cx="110" cy="110" r="84"/>
+            <circle class="ring-core" cx="110" cy="110" r="60"/>
+          </svg>
+          <div class="ring-center"><b id="ringPct">&ndash;</b><span>renewable</span></div>
+        </div>
+        <ul class="ring-legend" id="ringLegend"></ul>
+        <div class="bars" id="allocBars"></div>
+        <div class="astats" id="allocStats"></div>
+      </aside>
+
+      <section class="card c-src">
+        <header class="card-h"><h2>Generation sources</h2><a class="icon-btn sm" href="#sources" aria-label="Open Energy Sources"><svg class="i"><use href="#i-expand"/></svg></a></header>
+        <ul class="src-list" id="srcList"></ul>
+      </section>
+
+      <section class="card c-hist">
+        <header class="card-h"><h2>Dispatch history</h2><a class="icon-btn sm" href="#monitoring" aria-label="Open Grid Monitoring"><svg class="i"><use href="#i-expand"/></svg></a></header>
+        <div class="legend"><span><i class="lg ren"></i>Renewable</span><span><i class="lg fos"></i>Fossil</span><span><i class="lg dem"></i>Demand</span></div>
+        <div class="chart"><canvas id="cvHistOv"></canvas><div class="tip" id="tipHistOv" hidden></div></div>
+      </section>
+
+      <section class="card c-flow">
+        <header class="card-h"><h2>Energy flow</h2><a class="icon-btn sm" href="#sources" aria-label="Open Energy Sources"><svg class="i"><use href="#i-expand"/></svg></a></header>
+        <div class="flow" id="flowOv"></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ================= MONITORING ================= -->
+  <section class="view" id="view-monitoring" aria-labelledby="monTitle" hidden>
+    <header class="view-h"><h1 id="monTitle">Grid Monitoring</h1><p>Hour-by-hour results of the current simulation session.</p></header>
+    <div class="grid-2">
+      <section class="card">
+        <header class="card-h"><h2>Dispatch history</h2><span class="muted">MW per simulated hour</span></header>
+        <div class="legend"><span><i class="lg ren"></i>Renewable</span><span><i class="lg fos"></i>Fossil</span><span><i class="lg dem"></i>Demand</span></div>
+        <div class="chart"><canvas id="cvHistMon"></canvas><div class="tip" id="tipHistMon" hidden></div></div>
+      </section>
+      <section class="card">
+        <header class="card-h"><h2>Renewable share</h2><span class="muted">% of demand met by renewables</span></header>
+        <div class="chart"><canvas id="cvShare"></canvas><div class="tip" id="tipShare" hidden></div></div>
+      </section>
+      <section class="card">
+        <header class="card-h"><h2>CO&#8322; emissions</h2><span class="muted">tonnes per hour</span></header>
+        <div class="chart"><canvas id="cvCo2"></canvas><div class="tip" id="tipCo2" hidden></div></div>
+      </section>
+      <section class="card">
+        <header class="card-h"><h2>Battery state of charge</h2><span class="muted">% of storage capacity</span></header>
+        <div class="chart"><canvas id="cvSoc"></canvas><div class="tip" id="tipSoc" hidden></div></div>
+      </section>
+    </div>
+    <section class="card">
+      <header class="card-h"><h2>Dispatch table</h2><span class="muted" id="tableSub"></span></header>
       <div class="table-wrap">
-        <table id="perfTable">
-          <thead>
-            <tr>
-              <th class="l">Model</th>
-              <th class="l">Type</th>
-              <th class="r" id="perfTolHead">Tol. Acc</th>
-              <th class="r derived-h">Precision*</th>
-              <th class="r derived-h">Recall*</th>
-              <th class="r derived-h">F1*</th>
-              <th class="r">RMSE</th>
-              <th class="r">R²</th>
-            </tr>
-          </thead>
-          <tbody id="perfRows"></tbody>
+        <table>
+          <thead><tr><th>Source</th><th>Category</th><th class="r">Capacity (MW)</th><th class="r">Available (MW)</th><th class="r">Dispatched (MW)</th><th>Output vs capacity</th><th class="r">Battery charge</th><th class="r"><span class="sr">Remove</span></th></tr></thead>
+          <tbody id="srcBody"></tbody>
         </table>
       </div>
+    </section>
+  </section>
 
-      <p class="perf-note" id="perfNote">
-        <b>*Derived demand-class metrics.</b> Demand forecasting is a regression task,
-        so precision, recall and F1 are not native to it. They are derived by binning
-        actual and predicted demand into Low / Medium / High using thresholds computed
-        from the training data only.
-      </p>
-      <p class="perf-note dim" id="perfMeta">—</p>
+  <!-- ================= SOURCES ================= -->
+  <section class="view" id="view-sources" aria-labelledby="srcTitle" hidden>
+    <header class="view-h row"><div><h1 id="srcTitle">Energy Sources</h1><p>Capacity, availability and dispatch for every source on the grid.</p></div>
+      <button class="btn primary" id="btnAddSource2" type="button"><svg class="i"><use href="#i-plus"/></svg><span>Add source</span></button></header>
+    <div class="src-cards" id="srcCards"></div>
+    <section class="card">
+      <header class="card-h"><h2>Energy flow</h2><span class="muted">Animated lines show sources currently dispatching</span></header>
+      <div class="flow big" id="flowSrc"></div>
+    </section>
+  </section>
+
+  <!-- ================= PREDICTIONS ================= -->
+  <section class="view" id="view-predictions" aria-labelledby="prTitle" hidden>
+    <header class="view-h"><h1 id="prTitle">AI Predictions</h1><p>What the trained models forecast for the selected hour.</p></header>
+    <div class="grid-3">
+      <section class="card fc" id="fcSolar"></section>
+      <section class="card fc" id="fcWind"></section>
+      <section class="card">
+        <header class="card-h"><h2>Weather inputs</h2><button class="link" id="btnWeather2" type="button">Edit</button></header>
+        <dl class="wx" id="wxList"></dl>
+      </section>
+    </div>
+    <section class="card">
+      <header class="card-h"><h2>Forecast-driven output</h2><span class="muted">Solar and wind output of installed capacity, per simulated hour</span></header>
+      <div class="legend"><span><i class="lg sol"></i>Solar</span><span><i class="lg win"></i>Wind</span></div>
+      <div class="chart"><canvas id="cvFc"></canvas><div class="tip" id="tipFc" hidden></div></div>
+    </section>
+    <section class="card prose">
+      <header class="card-h"><h2>How to read these forecasts</h2></header>
+      <ul>
+        <li><b>Solar and wind</b> are predicted as capacity factors (0 to 1) from weather and time of day. The simulator multiplies each by the installed capacity.</li>
+        <li><b>Training targets are synthetic.</b> The dataset has no measured renewable output, so solar and wind targets are derived from weather readings. Their high R&sup2; shows the models learned that relationship. It is not evidence of real-world forecast skill.</li>
+        <li><b>Demand is a scenario input.</b> You set it with the demand controls. The demand forecasting model is benchmarked on the Model Performance page but does not drive dispatch.</li>
+        <li><b>History is session-only.</b> The chart records hours you simulate in this browser. Nothing is stored on the server.</li>
+      </ul>
+    </section>
+  </section>
+
+  <!-- ================= MODEL PERFORMANCE ================= -->
+  <section class="view" id="view-models" aria-labelledby="mdTitle" hidden>
+    <header class="view-h"><h1 id="mdTitle">Model Performance</h1><p>Benchmark of the traditional machine-learning algorithms behind the forecasts.</p></header>
+    <div class="empty" id="perfEmpty"><span class="skeleton-line"></span>Loading benchmark results&hellip;</div>
+    <div id="perfBody" hidden>
+      <div class="grid-prod">
+        <section class="card prod">
+          <header class="card-h"><h2>Production models</h2><span class="muted" id="prodSub"></span></header>
+          <div class="prod-grid" id="prodGrid"></div>
+        </section>
+        <section class="card best">
+          <span class="eyebrow">Best individual model</span><strong id="bestIndiv">&ndash;</strong><p id="bestIndivWhy"></p>
+        </section>
+        <section class="card best alt">
+          <span class="eyebrow">Best ensemble</span><strong id="bestEns">&ndash;</strong><p id="bestEnsWhy"></p>
+        </section>
+      </div>
+
+      <div class="metrics" id="metricCards"></div>
+
+      <div class="grid-2">
+        <section class="card">
+          <header class="card-h"><h2>Leaderboard</h2><span class="muted" id="lbSub">Accuracy within tolerance, higher is better</span></header>
+          <div class="hbars" id="hbAcc"></div>
+        </section>
+        <section class="card">
+          <header class="card-h"><h2>Forecast error (RMSE)</h2><span class="muted">kW, lower is better</span></header>
+          <div class="hbars" id="hbRmse"></div>
+        </section>
+      </div>
+
+      <section class="card">
+        <header class="card-h"><h2>Benchmark results</h2><span class="muted" id="perfSub"></span></header>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Model</th><th>Type</th><th class="r" id="perfTolHead">Accuracy</th><th class="r">Precision*</th><th class="r">Recall*</th><th class="r">F1*</th><th class="r">MAE (kW)</th><th class="r">RMSE (kW)</th><th class="r">R&sup2;</th></tr></thead>
+            <tbody id="perfRows"></tbody>
+          </table>
+        </div>
+        <p class="fine" id="perfNote"></p>
+      </section>
+
+      <section class="card">
+        <header class="card-h"><h2>Training information</h2></header>
+        <dl class="info" id="trainInfo"></dl>
+      </section>
     </div>
   </section>
 
-  <footer class="foot fade" style="--d:.24s">
-    <span id="footModels">Traditional ML forecasting models · run python train.py</span>
-    <span>Data: Tetuan City power consumption · 2017 · hourly</span>
-  </footer>
-
-  <!-- ============ CONTROL DOCK ============ -->
-  <div class="dock-wrap">
-    <div class="dock" id="dock">
-      <div class="dock-group">
-        <span class="dock-label">Time</span>
-        <button class="btn sm ghost" id="btnBack" type="button" title="Rewind 1 hour">−1h</button>
-        <button class="btn sm primary" id="btnFwd" type="button" title="Advance 1 hour">+1h</button>
-        <button class="btn sm ghost play" id="btnPlay" type="button" title="Auto-advance every second">▶</button>
-        <input type="datetime-local" id="timePick" class="time-pick" step="3600">
-        <button class="btn sm ghost" id="btnSetTime" type="button">Set</button>
-      </div>
-      <div class="dock-divider"></div>
-      <div class="dock-group">
-        <span class="dock-label">Demand</span>
-        <button class="btn sm ghost" id="btnDemandDown" type="button">−10</button>
-        <div class="demand-input">
-          <input type="number" id="demandSet" min="0" step="5" placeholder="MW">
+  <!-- ================= SETTINGS ================= -->
+  <section class="view" id="view-settings" aria-labelledby="stTitle" hidden>
+    <header class="view-h"><h1 id="stTitle">Settings</h1><p>Scenario files, display options and reference.</p></header>
+    <div class="grid-2">
+      <section class="card">
+        <header class="card-h"><h2>Scenario</h2></header>
+        <p class="fine">Save and Load use this browser. Export and Import use a JSON file you can keep or share.</p>
+        <div class="btn-grid">
+          <button class="btn" id="btnSave" type="button"><svg class="i"><use href="#i-save"/></svg><span>Save</span></button>
+          <button class="btn" id="btnLoad" type="button"><svg class="i"><use href="#i-load"/></svg><span>Load</span></button>
+          <button class="btn" id="btnExport" type="button"><svg class="i"><use href="#i-export"/></svg><span>Export JSON</span></button>
+          <button class="btn" id="btnImport" type="button"><svg class="i"><use href="#i-import"/></svg><span>Import JSON</span></button>
+          <button class="btn full" id="btnReset" type="button"><svg class="i"><use href="#i-reset"/></svg><span>Reset to default grid</span></button>
         </div>
-        <button class="btn sm ghost" id="btnDemandUp" type="button">+10</button>
-      </div>
-      <div class="dock-divider"></div>
-      <div class="dock-group">
-        <span class="dock-label">Sources</span>
-        <button class="btn sm primary" id="btnAddSource" type="button">➕ Add</button>
-      </div>
-      <div class="dock-divider"></div>
-      <div class="dock-group">
-        <button class="btn sm" id="btnWeather" type="button">🌦 Weather</button>
-        <button class="btn sm ghost" id="btnSave" type="button">💾 Save</button>
-        <button class="btn sm ghost" id="btnLoad" type="button">📂 Load</button>
-        <button class="btn sm ghost" id="btnExport" type="button">⬇ Export</button>
-        <button class="btn sm ghost" id="btnImport" type="button">⬆ Import</button>
-      </div>
+      </section>
+      <section class="card">
+        <header class="card-h"><h2>Display</h2></header>
+        <label class="switch"><input type="checkbox" id="optMotion"><span class="knob"></span><span>Reduce motion<small>Stops flow lines, turbines and number animations.</small></span></label>
+      </section>
     </div>
+    <section class="card prose">
+      <header class="card-h"><h2>Dispatch rules</h2></header>
+      <ol>
+        <li><b>Renewables first.</b> Solar, wind and hydro run at full available output.</li>
+        <li><b>Battery.</b> Surplus charges storage at 90% round-trip efficiency. A shortfall discharges it.</li>
+        <li><b>Fossil last.</b> Gas, coal and diesel fill what remains, cheapest first.</li>
+      </ol>
+      <p class="fine">Energy the battery cannot absorb is reported as curtailed. Demand the grid cannot cover is reported as unmet. Indicator definitions: <b>Supply coverage</b> is the share of demand met. <b>Clean energy utilisation</b> is the share of renewable output that is not curtailed.</p>
+    </section>
+  </section>
+
+  <footer class="foot">
+    <span id="footModels">Forecasting models: traditional machine learning</span>
+    <span>Data: Tetouan City power consumption, 2017, hourly</span>
+  </footer>
+</main>
+
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+
+<!-- ================= DIALOGS ================= -->
+<div class="modal" id="addSourceModal" role="dialog" aria-modal="true" aria-labelledby="addTitle" hidden>
+  <div class="modal-card">
+    <button class="icon-btn modal-x" data-close="addSourceModal" type="button" aria-label="Close"><svg class="i"><use href="#i-close"/></svg></button>
+    <h2 id="addTitle">Add generation source</h2>
+    <form id="addSourceForm">
+      <label class="field">Source type
+        <select id="srcType">
+          <option value="1">Solar</option><option value="2">Wind</option><option value="3">Hydro</option><option value="4">Battery</option>
+          <option value="5">Gas CCGT</option><option value="6">Coal</option><option value="7">Diesel</option>
+        </select>
+      </label>
+      <label class="field">Capacity (MW)<input type="number" id="srcCap" min="1" step="any" value="50" required></label>
+      <button class="btn primary full" type="submit">Add to grid</button>
+    </form>
   </div>
-  <input type="file" id="importFile" accept=".json,application/json" hidden>
+</div>
 
-  <!-- ============ GUIDE MODAL ============ -->
-  <div class="modal" id="guideModal" role="dialog" aria-modal="true" hidden>
-    <div class="modal-card">
-      <button class="modal-x" data-close="guideModal" type="button">✕</button>
-      <h2>📘 Guide</h2>
-      <div class="guide-body">
-        <section>
-          <h3>What is this?</h3>
-          <p>A machine-learning driven grid dispatcher. Three traditional machine-learning regression models (trained on Tetuan City's 2017 hourly data) forecast <b>demand</b>, <b>solar</b> and <b>wind</b> output from weather, cyclical time, lag and rolling-mean features. Every hour the allocator dispatches your sources to meet demand as cleanly as possible. The <b>Model Performance</b> panel shows the live benchmark of every algorithm that was compared.</p>
-        </section>
-        <section>
-          <h3>How dispatch works</h3>
-          <ol>
-            <li><b>Renewables first</b> — solar, wind &amp; hydro run at full output (zero cost, zero CO₂).</li>
-            <li><b>Battery</b> — surplus clean energy charges the battery (90% round-trip); a deficit makes it discharge.</li>
-            <li><b>Fossil last</b> — gas, coal &amp; diesel cover whatever is still missing, cheapest first.</li>
-          </ol>
-          <p class="tip">💡 Surplus that the battery can't absorb is <b>curtailed</b> — shown on the cards. A bigger battery means less curtailment.</p>
-        </section>
-        <section>
-          <h3>Controls</h3>
-          <ul>
-            <li><b>Time</b> — ±1h steps, a date/time picker to jump anywhere, or ▶ auto-play.</li>
-            <li><b>Demand</b> — ±10 MW or type an exact value.</li>
-            <li><b>Weather</b> — change temperature / humidity / wind; leave a field blank to keep its current value.</li>
-            <li><b>Add / Remove</b> — the dock's <b>➕ Add</b> adds any source; each table row has an <b>✕</b> to remove it.</li>
-            <li><b>Save / Load</b> — persist &amp; restore the grid to <code>grid_state.json</code>.</li>
-            <li><b>Export / Import</b> — download the grid as JSON or upload one back.</li>
-          </ul>
-        </section>
-      </div>
-      <button class="btn primary" data-close="guideModal" type="button">Got it</button>
-    </div>
+<div class="modal" id="weatherModal" role="dialog" aria-modal="true" aria-labelledby="wxTitle" hidden>
+  <div class="modal-card">
+    <button class="icon-btn modal-x" data-close="weatherModal" type="button" aria-label="Close"><svg class="i"><use href="#i-close"/></svg></button>
+    <h2 id="wxTitle">Edit weather</h2>
+    <p class="fine">Leave a field blank to keep its current value. Readings reset when the clock changes.</p>
+    <form id="weatherForm">
+      <label class="field">Temperature (&deg;C)<input type="number" step="0.1" id="wTemp"></label>
+      <label class="field">Humidity (%)<input type="number" step="1" min="0" max="100" id="wHum"></label>
+      <label class="field">Wind speed (m/s)<input type="number" step="0.1" min="0" id="wWind"></label>
+      <label class="field">General diffuse flows (W/m&sup2;)<input type="number" step="0.1" id="wGenDiff"></label>
+      <label class="field">Diffuse flows (W/m&sup2;)<input type="number" step="0.1" id="wDiff"></label>
+      <button class="btn primary full" type="submit">Apply</button>
+    </form>
   </div>
+</div>
 
-  <!-- ============ ADD SOURCE MODAL ============ -->
-  <div class="modal" id="addSourceModal" role="dialog" aria-modal="true" hidden>
-    <div class="modal-card">
-      <button class="modal-x" data-close="addSourceModal" type="button">✕</button>
-      <h2>➕ Add Source</h2>
-      <p class="modal-sub">Pick a source type and its capacity in MW.</p>
-      <form id="addSourceForm">
-        <label>Source type
-          <select id="srcType" class="sel">
-            <option value="1">☀️ Solar</option>
-            <option value="2">🍃 Wind</option>
-            <option value="3">🌊 Hydro</option>
-            <option value="4">🔋 Battery</option>
-            <option value="5">🔥 Gas CCGT</option>
-            <option value="6">⛏️ Coal</option>
-            <option value="7">🛢️ Diesel</option>
-          </select>
-        </label>
-        <label>Capacity (MW)<input type="number" id="srcCap" min="1" step="any" value="50" required></label>
-        <button class="btn primary full" type="submit">Add to Grid</button>
-      </form>
-    </div>
-  </div>
+<div id="toastWrap" aria-live="polite"></div>
 
-  <!-- ============ WEATHER MODAL ============ -->
-  <div class="modal" id="weatherModal" role="dialog" aria-modal="true" hidden>
-    <div class="modal-card">
-      <button class="modal-x" data-close="weatherModal" type="button">✕</button>
-      <h2>🌦 Weather Conditions</h2>
-      <p class="modal-sub">Leave a field blank to keep its previous value.</p>
-      <form id="weatherForm">
-        <label>Temperature (°C)<input type="number" step="0.1" id="wTemp" placeholder="—"></label>
-        <label>Humidity (%)<input type="number" step="1" min="0" max="100" id="wHum" placeholder="—"></label>
-        <label>Wind Speed (m/s)<input type="number" step="0.1" min="0" id="wWind" placeholder="—"></label>
-        <label>General Diffuse Flows (W/m²)<input type="number" step="0.1" id="wGenDiff" placeholder="—"></label>
-        <label>Diffuse Flows (W/m²)<input type="number" step="0.1" id="wDiff" placeholder="—"></label>
-        <button class="btn primary full" id="btnWeatherUpdate" type="submit">Update Weather</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- toasts -->
-  <div id="toastWrap" aria-live="polite"></div>
-
-  <script src="app.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

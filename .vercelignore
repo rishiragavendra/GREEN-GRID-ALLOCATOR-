@@ -15,3 +15,4 @@ export_runtime.py
 *.bat
 run.sh
 requirements-train.txt
+tests

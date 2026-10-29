@@ -9,6 +9,8 @@ demand with the least CO₂ possible.
 Two interfaces are included: a web dashboard (`app.py`) and a terminal
 simulator (`grid_sim.py`).
 
+![Dashboard](docs/img/dashboard.png)
+
 ---
 
 ## Quick start (Windows)
@@ -150,31 +152,43 @@ that plainly instead of forcing an artificial blend.
 
 ## Web dashboard
 
-All the original simulator behaviour is unchanged: live polling, KPI cards,
-charts, the source table, the control dock, weather and demand controls, and
-save / load / import / export.
+A dark, single-page energy-intelligence interface with six views:
 
-One panel is added — **Model Performance** — which reads
-`models/benchmark_results.json` via `GET /api/model-performance` and displays
-the real benchmark: the top models plus the best ensemble, the selected best
-individual and best combination with a data-driven explanation, and the derived
-classification metrics clearly marked. Nothing in it is hard-coded. If the
-benchmark has not been run, the panel shows a "run `python test.py`" hint and
-the rest of the dashboard is unaffected.
+| View | What it shows |
+|---|---|
+| Overview | Isometric city whose glow, turbine speed, battery fill, power lines and lit windows follow the live simulation, plus supply allocation, source status, dispatch history and the energy-flow diagram |
+| Grid Monitoring | Dispatch, renewable-share, CO₂ and battery history charts and the dispatch table |
+| Energy Sources | One card per source (capacity, availability, dispatch, utilisation), add/remove, animated energy flow |
+| AI Predictions | Solar and wind capacity-factor forecasts for the selected hour, weather inputs, forecast-driven output history |
+| Model Performance | Production models, best individual and ensemble, leaderboard, RMSE comparison, full benchmark table, training information |
+| Settings | Save / load / export / import, reset, reduced-motion switch, dispatch rules |
+
+Time, demand, weather and add-source controls stay visible on every view.
+
+Every number comes from the API responses. The city illustration is decorative
+(its layout is fixed); only its glow, motion and lit windows are driven by data.
+Two indicators are defined explicitly because the backend has no direct
+equivalent: **Supply coverage** is the share of demand that is met, and
+**Clean energy utilisation** is the share of renewable output that is not
+curtailed. If the benchmark files are missing, the Model Performance view shows
+an empty state and everything else keeps working.
+
+Frontend files: `public/index.html`, `public/css/style.css`, and
+`public/js/{app,scene,charts}.js` (state and API, isometric scene, canvas charts).
 
 ### API
 
 | Endpoint | Method | Purpose |
 |---|---|---|
 | `/api/state` | GET / POST | Default snapshot / recompute for the posted `state` |
-| `/api/health` | GET | Heartbeat for the LIVE badge |
+| `/api/health` | GET | Heartbeat for the connection indicator |
 | `/api/time` | POST | Advance/rewind hours, or jump to a datetime |
 | `/api/demand` | POST | Change demand by `delta` or set absolutely |
 | `/api/weather` | POST | Override weather fields |
 | `/api/sources` | POST | Add a generation source |
 | `/api/sources/remove` | POST | Remove a source by id |
 | `/api/import` | POST | Load a grid JSON (save / load / export happen in the browser) |
-| `/api/model-performance` | GET | **New** — benchmark results for the UI panel |
+| `/api/model-performance` | GET | Benchmark results for the Model Performance view |
 
 ---
 
@@ -196,7 +210,8 @@ mlpbl/
 ├── vercel.json, .vercelignore
 ├── requirements.txt        Runtime (fastapi, uvicorn)
 ├── requirements-train.txt  Training / benchmark stack
-├── public/                 index.html, app.js, style.css
+├── public/                 index.html, css/style.css, js/{app,scene,charts}.js
+├── tests/                  API smoke tests
 ├── models/                 Artifacts, metadata, benchmark results
 │   ├── demand_model.pkl, solar_model.pkl, wind_model.pkl
 │   ├── scaler_*.pkl, features.json, last_weather.json
