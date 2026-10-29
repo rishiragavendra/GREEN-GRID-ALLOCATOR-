@@ -1,0 +1,17 @@
+.venv
+__pycache__
+*.pkl
+*.csv
+*.txt.bak
+household_power_consumption.txt
+docs
+models
+grid_state.json
+train.py
+test.py
+grid_sim.py
+ml_pipeline.py
+export_runtime.py
+*.bat
+run.sh
+requirements-train.txt

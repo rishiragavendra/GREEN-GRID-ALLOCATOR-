@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Green Grid Allocator</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9889;</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- animated background -->
+  <div class="bg" aria-hidden="true">
+    <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+    <span class="grid-overlay"></span>
+  </div>
+
+  <!-- ============ TOP BAR ============ -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">⚡</div>
+      <div class="brand-text">
+        <h1>Green Grid <span>Allocator</span></h1>
+        <p class="subtitle">Intelligent Sustainable Energy Dispatch</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="time-chip" id="timeChip" title="Simulator time">🕐 —</div>
+      <div class="live-badge" id="liveBadge" title="Live updates every 1.5s"><span class="dot"></span><span id="liveLabel">LIVE</span></div>
+      <button class="btn ghost" id="guideBtn" type="button">📘&nbsp; Guide</button>
+    </div>
+  </header>
+
+  <!-- ============ KPI CARDS (built by JS) ============ -->
+  <section class="kpis" id="kpis" aria-label="Key metrics"></section>
+
+  <!-- ============ CHARTS ============ -->
+  <main class="charts">
+    <section class="card fade" id="cardMix" style="--d:0s">
+      <div class="card-head">
+        <h2>Renewable vs Non-Renewable</h2>
+        <span class="hint" id="mixSub">dispatch this hour</span>
+      </div>
+      <div class="mix-chart">
+        <div class="mix-legend">
+          <span><i class="swatch ren"></i>Renewable</span>
+          <span><i class="swatch fos"></i>Fossil</span>
+          <span><i class="swatch unmet"></i>Unmet</span>
+        </div>
+        <div class="mix-track" id="mixTrack">
+          <div class="mix-seg seg-ren" id="segRen"></div>
+          <div class="mix-seg seg-fos" id="segFos"></div>
+          <div class="mix-seg seg-unmet" id="segUnmet"></div>
+        </div>
+        <div class="mix-nums" id="mixNums"></div>
+      </div>
+    </section>
+
+    <section class="card fade" id="cardSources" style="--d:.06s">
+      <div class="card-head">
+        <h2>Source Contribution</h2>
+        <span class="hint">MW dispatched</span>
+      </div>
+      <div class="source-bars" id="sourceBars"></div>
+    </section>
+
+    <section class="card wide fade" id="cardTrend" style="--d:.12s">
+      <div class="card-head">
+        <h2>Renewable Share Over Time</h2>
+        <span class="hint">% of demand served by renewables · hover for details</span>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="trendChart" height="280"></canvas>
+        <div class="tooltip" id="trendTip" hidden></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ SOURCES TABLE ============ -->
+  <section class="card fade table-card" style="--d:.18s">
+    <div class="card-head">
+      <h2>Grid Sources</h2>
+      <span class="hint" id="tableSub">dispatch table</span>
+    </div>
+    <div class="table-wrap">
+      <table id="srcTable">
+        <thead>
+          <tr>
+            <th class="l">Source</th>
+            <th class="l">Type</th>
+            <th class="r">Capacity</th>
+            <th class="r">Available</th>
+            <th class="r">Used</th>
+            <th class="r">SoC</th>
+            <th class="r rm">Remove</th>
+          </tr>
+        </thead>
+        <tbody id="srcBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ MODEL PERFORMANCE (traditional ML benchmark) ============ -->
+  <section class="card fade table-card" id="cardPerf" style="--d:.21s">
+    <div class="card-head">
+      <h2>Model Performance</h2>
+      <span class="hint" id="perfSub">traditional ML benchmark</span>
+    </div>
+
+    <div id="perfEmpty" class="perf-empty">Loading benchmark results…</div>
+
+    <div id="perfBody" hidden>
+      <div class="perf-picks">
+        <div class="perf-pick">
+          <div class="pp-label">Best individual model</div>
+          <div class="pp-name" id="perfBestIndiv">—</div>
+          <div class="pp-why" id="perfBestIndivWhy">—</div>
+        </div>
+        <div class="perf-pick alt">
+          <div class="pp-label">Best combination</div>
+          <div class="pp-name" id="perfBestEns">—</div>
+          <div class="pp-why" id="perfBestEnsWhy">—</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table id="perfTable">
+          <thead>
+            <tr>
+              <th class="l">Model</th>
+              <th class="l">Type</th>
+              <th class="r" id="perfTolHead">Tol. Acc</th>
+              <th class="r derived-h">Precision*</th>
+              <th class="r derived-h">Recall*</th>
+              <th class="r derived-h">F1*</th>
+              <th class="r">RMSE</th>
+              <th class="r">R²</th>
+            </tr>
+          </thead>
+          <tbody id="perfRows"></tbody>
+        </table>
+      </div>
+
+      <p class="perf-note" id="perfNote">
+        <b>*Derived demand-class metrics.</b> Demand forecasting is a regression task,
+        so precision, recall and F1 are not native to it. They are derived by binning
+        actual and predicted demand into Low / Medium / High using thresholds computed
+        from the training data only.
+      </p>
+      <p class="perf-note dim" id="perfMeta">—</p>
+    </div>
+  </section>
+
+  <footer class="foot fade" style="--d:.24s">
+    <span id="footModels">Traditional ML forecasting models · run python train.py</span>
+    <span>Data: Tetuan City power consumption · 2017 · hourly</span>
+  </footer>
+
+  <!-- ============ CONTROL DOCK ============ -->
+  <div class="dock-wrap">
+    <div class="dock" id="dock">
+      <div class="dock-group">
+        <span class="dock-label">Time</span>
+        <button class="btn sm ghost" id="btnBack" type="button" title="Rewind 1 hour">−1h</button>
+        <button class="btn sm primary" id="btnFwd" type="button" title="Advance 1 hour">+1h</button>
+        <button class="btn sm ghost play" id="btnPlay" type="button" title="Auto-advance every second">▶</button>
+        <input type="datetime-local" id="timePick" class="time-pick" step="3600">
+        <button class="btn sm ghost" id="btnSetTime" type="button">Set</button>
+      </div>
+      <div class="dock-divider"></div>
+      <div class="dock-group">
+        <span class="dock-label">Demand</span>
+        <button class="btn sm ghost" id="btnDemandDown" type="button">−10</button>
+        <div class="demand-input">
+          <input type="number" id="demandSet" min="0" step="5" placeholder="MW">
+        </div>
+        <button class="btn sm ghost" id="btnDemandUp" type="button">+10</button>
+      </div>
+      <div class="dock-divider"></div>
+      <div class="dock-group">
+        <span class="dock-label">Sources</span>
+        <button class="btn sm primary" id="btnAddSource" type="button">➕ Add</button>
+      </div>
+      <div class="dock-divider"></div>
+      <div class="dock-group">
+        <button class="btn sm" id="btnWeather" type="button">🌦 Weather</button>
+        <button class="btn sm ghost" id="btnSave" type="button">💾 Save</button>
+        <button class="btn sm ghost" id="btnLoad" type="button">📂 Load</button>
+        <button class="btn sm ghost" id="btnExport" type="button">⬇ Export</button>
+        <button class="btn sm ghost" id="btnImport" type="button">⬆ Import</button>
+      </div>
+    </div>
+  </div>
+  <input type="file" id="importFile" accept=".json,application/json" hidden>
+
+  <!-- ============ GUIDE MODAL ============ -->
+  <div class="modal" id="guideModal" role="dialog" aria-modal="true" hidden>
+    <div class="modal-card">
+      <button class="modal-x" data-close="guideModal" type="button">✕</button>
+      <h2>📘 Guide</h2>
+      <div class="guide-body">
+        <section>
+          <h3>What is this?</h3>
+          <p>A machine-learning driven grid dispatcher. Three traditional machine-learning regression models (trained on Tetuan City's 2017 hourly data) forecast <b>demand</b>, <b>solar</b> and <b>wind</b> output from weather, cyclical time, lag and rolling-mean features. Every hour the allocator dispatches your sources to meet demand as cleanly as possible. The <b>Model Performance</b> panel shows the live benchmark of every algorithm that was compared.</p>
+        </section>
+        <section>
+          <h3>How dispatch works</h3>
+          <ol>
+            <li><b>Renewables first</b> — solar, wind &amp; hydro run at full output (zero cost, zero CO₂).</li>
+            <li><b>Battery</b> — surplus clean energy charges the battery (90% round-trip); a deficit makes it discharge.</li>
+            <li><b>Fossil last</b> — gas, coal &amp; diesel cover whatever is still missing, cheapest first.</li>
+          </ol>
+          <p class="tip">💡 Surplus that the battery can't absorb is <b>curtailed</b> — shown on the cards. A bigger battery means less curtailment.</p>
+        </section>
+        <section>
+          <h3>Controls</h3>
+          <ul>
+            <li><b>Time</b> — ±1h steps, a date/time picker to jump anywhere, or ▶ auto-play.</li>
+            <li><b>Demand</b> — ±10 MW or type an exact value.</li>
+            <li><b>Weather</b> — change temperature / humidity / wind; leave a field blank to keep its current value.</li>
+            <li><b>Add / Remove</b> — the dock's <b>➕ Add</b> adds any source; each table row has an <b>✕</b> to remove it.</li>
+            <li><b>Save / Load</b> — persist &amp; restore the grid to <code>grid_state.json</code>.</li>
+            <li><b>Export / Import</b> — download the grid as JSON or upload one back.</li>
+          </ul>
+        </section>
+      </div>
+      <button class="btn primary" data-close="guideModal" type="button">Got it</button>
+    </div>
+  </div>
+
+  <!-- ============ ADD SOURCE MODAL ============ -->
+  <div class="modal" id="addSourceModal" role="dialog" aria-modal="true" hidden>
+    <div class="modal-card">
+      <button class="modal-x" data-close="addSourceModal" type="button">✕</button>
+      <h2>➕ Add Source</h2>
+      <p class="modal-sub">Pick a source type and its capacity in MW.</p>
+      <form id="addSourceForm">
+        <label>Source type
+          <select id="srcType" class="sel">
+            <option value="1">☀️ Solar</option>
+            <option value="2">🍃 Wind</option>
+            <option value="3">🌊 Hydro</option>
+            <option value="4">🔋 Battery</option>
+            <option value="5">🔥 Gas CCGT</option>
+            <option value="6">⛏️ Coal</option>
+            <option value="7">🛢️ Diesel</option>
+          </select>
+        </label>
+        <label>Capacity (MW)<input type="number" id="srcCap" min="1" step="any" value="50" required></label>
+        <button class="btn primary full" type="submit">Add to Grid</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ WEATHER MODAL ============ -->
+  <div class="modal" id="weatherModal" role="dialog" aria-modal="true" hidden>
+    <div class="modal-card">
+      <button class="modal-x" data-close="weatherModal" type="button">✕</button>
+      <h2>🌦 Weather Conditions</h2>
+      <p class="modal-sub">Leave a field blank to keep its previous value.</p>
+      <form id="weatherForm">
+        <label>Temperature (°C)<input type="number" step="0.1" id="wTemp" placeholder="—"></label>
+        <label>Humidity (%)<input type="number" step="1" min="0" max="100" id="wHum" placeholder="—"></label>
+        <label>Wind Speed (m/s)<input type="number" step="0.1" min="0" id="wWind" placeholder="—"></label>
+        <label>General Diffuse Flows (W/m²)<input type="number" step="0.1" id="wGenDiff" placeholder="—"></label>
+        <label>Diffuse Flows (W/m²)<input type="number" step="0.1" id="wDiff" placeholder="—"></label>
+        <button class="btn primary full" id="btnWeatherUpdate" type="submit">Update Weather</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- toasts -->
+  <div id="toastWrap" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
