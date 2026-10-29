@@ -14,6 +14,21 @@ ROOT = core.ROOT
 PUBLIC = ROOT / "public"
 
 app = FastAPI(title="Green Grid Allocator")
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class VercelPathFixMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        path = request.scope["path"]
+
+        if path in ("/api/index", "/api/index.py"):
+            original_path = request.headers.get("x-vercel-original-path")
+
+            if original_path:
+                request.scope["path"] = original_path
+
+        return await call_next(request)
+
+app.add_middleware(VercelPathFixMiddleware)
 
 
 def _state(body):
